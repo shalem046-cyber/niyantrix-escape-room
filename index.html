@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#05070b" />
+  <title>404 // Recovery Node</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!--
+    NIYANTRIX'26 // BROKEN WEB ENGINE
+    Organizer-only source clue: TRACE=VIEW | RECOVERY_FRAGMENT=BEYOND | POSITION=2
+    The rendered page is not the entire page.
+  -->
+  <div class="noise"></div>
+  <div class="scanline"></div>
+  <div class="glitch-flash" id="glitchFlash"></div>
+
+  <header class="topbar">
+    <button id="systemDot" class="system-dot" aria-label="System status"></button>
+    <div class="brand">NXR // RECOVERY NODE</div>
+    <div class="header-right">
+      <span id="missionId">NODE-0000</span>
+      <span id="timer">16:00</span>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section id="landing" class="screen active">
+      <div class="error-code">404</div>
+      <div class="eyebrow">UNHANDLED NODE EXCEPTION</div>
+      <h1>PAGE NOT FOUND</h1>
+      <p class="muted hero-copy">The interface is damaged. The server is still answering. Find the recovery path hidden inside the page.</p>
+
+      <div class="terminal-card">
+        <div class="terminal-head"><span>RECOVERY CONSOLE</span><span id="bootStatus">WAITING</span></div>
+        <div class="terminal-body" id="bootLog">
+          <div>&gt; requesting node status...</div>
+          <div>&gt; response: <span class="danger">BROKEN</span></div>
+          <div>&gt; visible interface integrity: <span class="warning">63%</span></div>
+          <div>&gt; manual recovery route: <span class="cyan">UNKNOWN</span></div>
+          <div>&gt; <span class="cursor">_</span></div>
+        </div>
+      </div>
+
+      <div class="start-row">
+        <input id="teamName" class="team-input" maxlength="18" placeholder="TEAM NAME (optional)" autocomplete="off" />
+        <button id="enterBtn" class="ghost-btn">ENTER RECOVERY MODE</button>
+      </div>
+      <div class="micro-copy">No map. No puzzle numbers. The website is part of the puzzle.</div>
+    </section>
+
+    <section id="board" class="screen">
+      <div class="board-header">
+        <div>
+          <span class="eyebrow">LIVE RECOVERY BOARD</span>
+          <h2>Investigate the broken interface.</h2>
+          <p class="muted board-sub">Not every clue is visible. Not every message is trustworthy.</p>
+        </div>
+        <div class="progress-box">
+          <span>FRAGMENTS</span>
+          <strong id="fragmentCount">0 / 5</strong>
+          <small id="mistakeCount">0 errors</small>
+        </div>
+      </div>
+
+      <div class="telemetry-bar">
+        <div><span>NODE</span><strong id="nodeStatus">UNSTABLE</strong></div>
+        <div><span>PATH</span><strong id="pathStatus">UNKNOWN</strong></div>
+        <div><span>INTEGRITY</span><strong id="integrityStatus">63%</strong></div>
+        <div><span>TEAM</span><strong id="teamStatus">UNNAMED</strong></div>
+      </div>
+
+      <div class="module-grid">
+        <article class="module" data-module="signal">
+          <div class="module-top"><span>SIG//11</span><span class="status locked">UNREAD</span></div>
+          <h3>Signal Drift</h3>
+          <p>One telemetry stream is out of phase. Find the value the system should have reported.</p>
+          <button class="module-btn" data-open="signal">Inspect stream</button>
+        </article>
+
+        <article class="module" data-module="trace">
+          <div class="module-top"><span>SRC//04</span><span class="status locked">UNREAD</span></div>
+          <h3>Source Trace</h3>
+          <p>The browser rendered the page, but not everything that came with it.</p>
+          <button class="module-btn" data-open="trace">Trace source</button>
+        </article>
+
+        <article class="module" data-module="decode">
+          <div class="module-top"><span>BIN//23</span><span class="status locked">UNREAD</span></div>
+          <h3>Dead Packet</h3>
+          <p>An archived packet is readable only after you identify its encoding.</p>
+          <button class="module-btn" data-open="decode">Open packet</button>
+        </article>
+
+        <article class="module" data-module="logic">
+          <div class="module-top"><span>LOG//08</span><span class="status locked">UNREAD</span></div>
+          <h3>Logic Gate</h3>
+          <p>A recovery relay only opens when the digital state is correct.</p>
+          <button class="module-btn" data-open="logic">Test relay</button>
+        </article>
+
+        <article class="module" data-module="route">
+          <div class="module-top"><span>NET//31</span><span class="status locked">UNREAD</span></div>
+          <h3>Route Table</h3>
+          <p>Five nodes, four rules, one valid order. The wrong path costs time.</p>
+          <button class="module-btn" data-open="route">Resolve route</button>
+        </article>
+      </div>
+
+      <div class="evidence-strip">
+        <div class="evidence-head">
+          <span class="eyebrow">RECOVERED EVIDENCE</span>
+          <span class="tiny-note">Fragments have hidden positions.</span>
+        </div>
+        <div id="fragments" class="fragments"></div>
+      </div>
+
+      <div class="final-row">
+        <div class="hint-note">Stuck? The system can reveal one trace, but every hint costs 30 seconds.</div>
+        <button id="hintBtn" class="ghost-btn small">REQUEST SYSTEM TRACE</button>
+        <button id="finalBtn" class="final-btn disabled">FINAL TERMINAL — LOCKED</button>
+      </div>
+    </section>
+
+    <section id="moduleView" class="screen module-view">
+      <div class="module-view-head">
+        <button id="backBtn" class="back-btn">← BACK TO BOARD</button>
+        <div id="moduleTitle"></div>
+      </div>
+      <div id="moduleContent" class="module-content"></div>
+    </section>
+
+    <section id="finalView" class="screen">
+      <div class="final-card wide">
+        <span class="eyebrow">FINAL TERMINAL</span>
+        <h2>Reconstruct the recovery phrase.</h2>
+        <p class="muted">The fragments are out of order. Their position markers determine how they must be assembled.</p>
+        <div id="finalFragments" class="final-fragments"></div>
+        <div class="final-hint-box">The page has been lying about one thing from the start. Decide what to trust: rendered data, source data, or verified relationships.</div>
+        <input id="finalInput" class="code-input" autocomplete="off" placeholder="ENTER RECOVERY PHRASE" />
+        <button id="submitFinal" class="primary-btn">AUTHORIZE RECOVERY</button>
+        <div id="finalFeedback" class="feedback"></div>
+      </div>
+    </section>
+
+    <section id="successView" class="screen centered">
+      <div class="success-glow"></div>
+      <span class="eyebrow">RECOVERY COMPLETE</span>
+      <h2>SYSTEM RESTORED</h2>
+      <div id="successStats" class="success-stats"></div>
+      <p id="successText" class="success-text"></p>
+      <button id="restartBtn" class="ghost-btn">RUN A NEW MISSION</button>
+    </section>
+
+    <section id="failView" class="screen centered">
+      <span class="eyebrow danger">NODE SEALED</span>
+      <h2>RECOVERY TIMED OUT</h2>
+      <p class="success-text">The interface sealed the active session. Reset the node and launch a new mission.</p>
+      <button id="restartFailBtn" class="ghost-btn">RESET NODE</button>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+  <div id="hintPanel" class="hint-panel hidden">
+    <div class="hint-head"><span>SYSTEM TRACE // HINT</span><button id="closeHint">×</button></div>
+    <pre id="hintText"></pre>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

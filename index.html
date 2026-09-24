@@ -4,15 +4,16 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#05070b" />
-  <title>404 // Recovery Node</title>
+  <title>NIYANTRIX'26 // Secure Access</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!--
-    NIYANTRIX'26 // BROKEN WEB ENGINE
-    Organizer-only source clue: TRACE=VIEW | RECOVERY_FRAGMENT=BEYOND | POSITION=2
-    The rendered page is not the entire page.
+    NIYANTRIX'26 // AUTH LAYER
+    Organizer note: this is an escape-room gate, not real authentication.
+    The rendered interface is intentionally not the whole story.
   -->
+  <!-- CREATOR CHANNEL: encoded access route lives in script.js. Do not display the sequence here. -->
   <div class="noise"></div>
   <div class="scanline"></div>
   <div class="glitch-flash" id="glitchFlash"></div>
@@ -22,12 +23,51 @@
     <div class="brand">NXR // RECOVERY NODE</div>
     <div class="header-right">
       <span id="missionId">NODE-0000</span>
-      <span id="timer">16:00</span>
+      <span id="timer">LOCKED</span>
     </div>
   </header>
 
   <main class="shell">
-    <section id="landing" class="screen active">
+
+    <section id="login" class="screen active">
+      <div class="auth-shell">
+        <div class="auth-kicker">AUTHENTICATION LAYER // 01</div>
+        <div id="authBrand" class="auth-brand">NIYANTRIX<span>'26</span></div>
+        <div class="auth-divider"><span>SECURE ACCESS TERMINAL</span><span id="authLevel">LEVEL: RESTRICTED</span></div>
+
+        <div class="auth-card">
+          <div class="auth-topline">
+            <span id="authStateLabel">IDENTITY VERIFICATION REQUIRED</span>
+            <span id="authSignal">● OFFLINE</span>
+          </div>
+
+          <p class="auth-copy">The system does not trust passwords alone. Proceed as though the interface is hiding something.</p>
+
+          <label class="auth-label" for="authUser">ACCESS ID</label>
+          <input id="authUser" class="auth-input" maxlength="24" autocomplete="off" spellcheck="false" placeholder="ENTER ACCESS ID" />
+
+          <label class="auth-label" for="authPass">PASSCODE</label>
+          <input id="authPass" class="auth-input" type="password" maxlength="32" autocomplete="off" placeholder="ENTER PASSCODE" />
+
+          <button id="authBtn" class="auth-btn">REQUEST ACCESS</button>
+
+          <div class="auth-console" id="authFeedback">&gt; awaiting credential signature...</div>
+
+          <div class="auth-meta">
+            <span id="authAttempts">ATTEMPTS: 0</span>
+            <span id="authLock">LOCK: OPEN</span>
+            <span>INTRUDERS: PROBABLY YOU</span>
+          </div>
+        </div>
+
+        <div class="auth-footnote">
+          <span>AUTH NODE: NXR-A01</span>
+          <span>DIRECT CREDENTIAL PATH: UNAVAILABLE</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="landing" class="screen">
       <div class="error-code">404</div>
       <div class="eyebrow">UNHANDLED NODE EXCEPTION</div>
       <h1>PAGE NOT FOUND</h1>

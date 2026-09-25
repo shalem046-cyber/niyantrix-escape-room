@@ -445,7 +445,7 @@
 
   function launchMission() {
     state.started = true;
-    state.teamName = ($('#teamName').value.trim() || 'UNNAMED').slice(0, 18).toUpperCase();
+    state.teamName = 'ARCHITECT';
     $('#teamStatus').textContent = state.teamName;
     resetBoard();
     show('board');
@@ -454,7 +454,6 @@
 
   function restart() {
     state.started = true;
-    $('#teamName').value = state.teamName === 'UNNAMED' ? '' : state.teamName;
     $('#teamStatus').textContent = state.teamName;
     resetBoard();
     show('board');

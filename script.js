@@ -11,6 +11,9 @@
     teamName: 'UNNAMED',
     finalAttempts: 0,
     orderKey: [],
+    loginAttempts: 0,
+    wrongClicks: 0,
+    creatorUnlocked: false,
   };
 
   const $ = (s, root = document) => root.querySelector(s);
@@ -57,6 +60,86 @@
     el.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.remove('show'), 2100);
+  }
+
+  function showReaction(message = 'WRONG BUTTON 😭') {
+    const modal = $('#reactionModal');
+    if (!modal) return;
+    $('#reactionText').textContent = message;
+    const img = $('#reactionImage');
+    const fallback = $('#reactionFallback');
+    if (img) {
+      img.onerror = () => {
+        img.style.display = 'none';
+        fallback.classList.add('show');
+      };
+      img.style.display = 'block';
+      fallback.classList.remove('show');
+      img.src = state.wrongClicks % 2 === 0
+        ? 'assets/memes/reaction-2.jpg'
+        : 'assets/memes/reaction-1.jpg';
+    }
+    modal.classList.remove('hidden');
+    clearTimeout(showReaction._t);
+    showReaction._t = setTimeout(() => modal.classList.add('hidden'), 1150);
+  }
+
+  function spawnFakeButtons() {
+    const box = $('#fakeButtons');
+    if (!box) return;
+    const labels = ['VERIFY','CONTINUE','I AM HUMAN','CONFIRM','OVERRIDE','PROCEED','TRUST ME','ACCESS','VALIDATE','UNLOCK'];
+    const count = Math.min(3 + Math.max(0, state.loginAttempts - 1) * 2, 10);
+    box.innerHTML = '';
+    for (let i = 0; i < count; i += 1) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fake-auth-btn';
+      btn.textContent = labels[i];
+      btn.addEventListener('click', () => {
+        state.wrongClicks += 1;
+        $('#wrongClickCounter').textContent = `WRONG CLICKS: ${state.wrongClicks} · ATTEMPTS: ${state.loginAttempts}`;
+        btn.classList.add('wrong-hit');
+        glitch();
+        showReaction(state.wrongClicks > 4 ? 'YOU KEEP CLICKING THE TRAPS. 😭' : 'WRONG BUTTON 😭');
+        toast('FALSE CONTROL DETECTED');
+        setTimeout(() => btn.remove(), 260);
+      });
+      box.appendChild(btn);
+    }
+  }
+
+  function attemptLogin() {
+    const id = $('#loginId').value.trim().toUpperCase();
+    const key = $('#accessKey').value.trim().toUpperCase();
+    state.loginAttempts += 1;
+
+    if (id === 'ARCHITECT' && key === 'PX//7F-ACCESS') {
+      state.creatorUnlocked = true;
+      $('#loginSession').textContent = 'GRANTED';
+      $('#loginSession').className = 'cyan';
+      $('#bootStatus').textContent = 'SESSION: GRANTED';
+      $('#loginMessage').innerHTML = '<strong>CREATOR ACCESS</strong> · ACCESS GRANTED ✓';
+      $('#fakeButtons').innerHTML = '';
+      $('#enterBtn').textContent = 'ENTER RECOVERY MODE';
+      $('#enterBtn').classList.remove('dodging');
+      $('#wrongClickCounter').textContent = `CREATOR AUTHENTICATED · ATTEMPTS: ${state.loginAttempts}`;
+      setTimeout(launchMission, 520);
+      return;
+    }
+
+    $('#loginSession').textContent = 'REJECTED';
+    $('#loginSession').className = 'danger';
+    $('#bootStatus').textContent = 'ACCESS DENIED';
+    $('#loginMessage').textContent =
+      state.loginAttempts === 1
+        ? 'Credentials rejected. The interface has become less cooperative.'
+        : state.loginAttempts === 2
+          ? 'Incorrect. There are now several buttons. Only one of them is useful.'
+          : 'Authentication failure. Stop trusting the obvious controls.';
+    spawnFakeButtons();
+    if (state.loginAttempts >= 2) $('#enterBtn').classList.add('dodging');
+    glitch();
+    toast(state.loginAttempts === 1 ? 'ACCESS DENIED' : 'SYSTEM: NICE TRY.');
   }
 
   function glitch() {
@@ -392,8 +475,10 @@
     toast('System trace exposed. -30 sec');
   }
 
-  $('#enterBtn').addEventListener('click', launchMission);
-  $('#teamName').addEventListener('keydown', (e) => { if (e.key === 'Enter') launchMission(); });
+  $('#enterBtn').addEventListener('click', attemptLogin);
+  $('#loginId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+  $('#accessKey').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+  $('#closeReaction').addEventListener('click', () => $('#reactionModal').classList.add('hidden'));
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
   $('#hintBtn').addEventListener('click', requestHint);

@@ -36,3 +36,28 @@ h1{font-size:clamp(30px,5vw,56px);letter-spacing:.08em;margin:26px 0 10px}h2{fon
 .final-card{padding:30px;max-width:900px}.final-card.wide{max-width:900px}.final-fragments{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin:24px 0}.final-fragments .fragment{min-height:62px;justify-content:center;text-align:center;flex-direction:column}.final-hint-box{border:1px dashed #2b4154;background:#070c12;color:#7f93a9;font:11px/1.6 monospace;padding:13px;margin-bottom:16px}.final-card .code-input{width:100%;margin-bottom:10px}.centered{text-align:center;min-height:58vh;display:none;align-items:center;justify-content:center;flex-direction:column}.centered.active{display:flex}.success-glow{width:220px;height:220px;border-radius:50%;background:rgba(118,240,176,.11);filter:blur(48px);position:absolute}.success-text{max-width:620px;color:#9fb1c6;line-height:1.8}.success-stats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:18px 0}.stat-chip{border:1px solid #2b4151;background:#081019;padding:10px 13px;font:11px monospace;color:#bed2e5}
 .toast{position:fixed;right:18px;bottom:18px;background:#0c131d;border:1px solid #2d4154;color:#c9d7e5;padding:12px 14px;font:11px monospace;opacity:0;transform:translateY(8px);pointer-events:none;transition:.25s;z-index:50}.toast.show{opacity:1;transform:none}.hint-panel{position:fixed;right:18px;bottom:72px;width:min(430px,calc(100% - 36px));background:#070c12;border:1px solid #2b4154;box-shadow:var(--shadow);z-index:45}.hint-panel.hidden{display:none}.hint-panel pre{margin:0;padding:18px;color:#9db3c9;font:12px/1.7 monospace;white-space:pre-wrap}.hint-head button{background:none;border:0;color:#98aabd;font-size:18px}
 @media (max-width:760px){.module-grid,.telemetry-bar{grid-template-columns:1fr}.module:last-child{grid-column:auto}.start-row,.final-row{flex-direction:column;align-items:stretch}.team-input{width:100%}.final-fragments{grid-template-columns:1fr 1fr}.route-board{grid-template-columns:1fr 1fr 1fr}.module-view-head{align-items:flex-start;flex-direction:column}.puzzle-row{flex-direction:column;align-items:stretch}.error-code{font-size:120px}}
+.login-card{max-width:760px}
+.login-line{font:13px/1.9 monospace;color:#aebed0}
+.login-form{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:20px 0}
+.login-form label{font:10px monospace;letter-spacing:.12em;color:#60758b}
+.login-form input{display:block;width:100%;margin-top:7px}
+.login-message{min-height:24px;font:11px monospace;color:#7f90a5;margin:8px 0 12px}
+.fake-buttons{display:flex;flex-wrap:wrap;gap:9px;min-height:44px;align-items:center}
+.fake-auth-btn{border:1px solid #63303b;background:#140a0e;color:#ff8294;padding:9px 12px;font:10px monospace;letter-spacing:.08em;transition:.16s}
+.fake-auth-btn:hover{border-color:var(--red);transform:translateY(-2px) rotate(-1deg);box-shadow:0 0 18px rgba(255,100,124,.15)}
+.fake-auth-btn.wrong-hit{animation:wrongHit .25s ease forwards}
+@keyframes wrongHit{to{opacity:0;transform:scale(.65) rotate(7deg)}}
+.authenticate-btn{transition:transform .16s ease,opacity .16s ease}
+.authenticate-btn.dodging{animation:dodgeAuth .7s steps(2,end) infinite}
+@keyframes dodgeAuth{0%,100%{transform:translateX(0)}25%{transform:translateX(28px)}50%{transform:translateX(-18px)}75%{transform:translateY(-8px)}}
+.reaction-modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.72);display:grid;place-items:center;padding:18px}
+.reaction-modal.hidden{display:none}
+.reaction-card{width:min(360px,100%);background:#090e16;border:1px solid #4a2a35;box-shadow:0 30px 100px rgba(0,0,0,.65)}
+.reaction-top{display:flex;justify-content:space-between;padding:10px 13px;border-bottom:1px solid #27313e;font:10px monospace;color:#8091a4;letter-spacing:.1em}
+.reaction-top button{border:0;background:none;color:#9aaabd;font-size:20px}
+.reaction-frame{min-height:230px;display:grid;place-items:center;background:#020407;overflow:hidden}
+.reaction-frame img{width:100%;max-height:330px;object-fit:cover}
+.reaction-fallback{display:none;text-align:center;font:42px/1.5 system-ui;padding:42px;color:#ff8294}
+.reaction-fallback.show{display:block}
+.reaction-text{padding:16px;text-align:center;font:12px monospace;color:#ff9aad}
+@media (max-width:760px){.login-form{grid-template-columns:1fr}.login-card{margin-top:22px}.fake-buttons{justify-content:center}.reaction-frame{min-height:190px}}

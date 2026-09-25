@@ -28,28 +28,41 @@
 
   <main class="shell">
     <section id="landing" class="screen active">
-      <div class="error-code">404</div>
-      <div class="eyebrow">UNHANDLED NODE EXCEPTION</div>
-      <h1>PAGE NOT FOUND</h1>
-      <p class="muted hero-copy">The interface is damaged. The server is still answering. Find the recovery path hidden inside the page.</p>
+      <div class="error-code">PX//</div>
+      <div class="eyebrow">PARADOX//ACCESS · RESTRICTED NODE</div>
+      <h1>AUTHENTICATION REQUIRED</h1>
+      <p class="muted hero-copy">The interface is watching. Enter valid credentials to establish a recovery session.</p>
 
-      <div class="terminal-card">
-        <div class="terminal-head"><span>RECOVERY CONSOLE</span><span id="bootStatus">WAITING</span></div>
-        <div class="terminal-body" id="bootLog">
-          <div>&gt; requesting node status...</div>
-          <div>&gt; response: <span class="danger">BROKEN</span></div>
-          <div>&gt; visible interface integrity: <span class="warning">63%</span></div>
-          <div>&gt; manual recovery route: <span class="cyan">UNKNOWN</span></div>
-          <div>&gt; <span class="cursor">_</span></div>
+      <div class="terminal-card login-card">
+        <div class="terminal-head"><span>SECURE ACCESS CONSOLE</span><span id="bootStatus">STANDBY</span></div>
+        <div class="terminal-body">
+          <div class="login-line">&gt; node status: <span class="cyan">ONLINE</span></div>
+          <div class="login-line">&gt; session: <span id="loginSession" class="warning">UNAUTHENTICATED</span></div>
+          <div class="login-form">
+            <label>IDENTIFIER<input id="loginId" class="team-input" maxlength="24" placeholder="ENTER IDENTIFIER" autocomplete="off" /></label>
+            <label>ACCESS KEY<input id="accessKey" class="team-input" maxlength="32" placeholder="ENTER ACCESS KEY" autocomplete="off" /></label>
+          </div>
+          <div id="loginMessage" class="login-message">Awaiting credentials...</div>
+          <div id="fakeButtons" class="fake-buttons" aria-live="polite"></div>
+          <div class="start-row login-actions">
+            <button id="enterBtn" class="ghost-btn authenticate-btn">AUTHENTICATE</button>
+          </div>
         </div>
       </div>
-
-      <div class="start-row">
-        <input id="teamName" class="team-input" maxlength="18" placeholder="TEAM NAME (optional)" autocomplete="off" />
-        <button id="enterBtn" class="ghost-btn">ENTER RECOVERY MODE</button>
-      </div>
-      <div class="micro-copy">No map. No puzzle numbers. The website is part of the puzzle.</div>
+      <div id="wrongClickCounter" class="micro-copy">WRONG CLICKS: 0 · ATTEMPTS: 0</div>
+      <div class="micro-copy">The website is part of the puzzle. Not every button is telling the truth.</div>
     </section>
+
+    <div id="reactionModal" class="reaction-modal hidden" role="dialog" aria-live="assertive">
+      <div class="reaction-card">
+        <div class="reaction-top"><span>PARADOX//SYSTEM</span><button id="closeReaction" aria-label="Close">×</button></div>
+        <div class="reaction-frame">
+          <img id="reactionImage" alt="System reaction" src="assets/memes/reaction-1.jpg" />
+          <div id="reactionFallback" class="reaction-fallback">🤨<br><strong>WRONG BUTTON.</strong></div>
+        </div>
+        <div id="reactionText" class="reaction-text">That was not the button.</div>
+      </div>
+    </div>
 
     <section id="board" class="screen">
       <div class="board-header">

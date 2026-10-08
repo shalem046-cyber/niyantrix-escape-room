@@ -82,3 +82,5 @@ h1{font-size:clamp(30px,5vw,56px);letter-spacing:.08em;margin:26px 0 10px}h2{fon
 .login-meta span+span{border-left:1px solid var(--line)}
 .login-meta strong{display:block;font:16px monospace;color:#c9d7e6;margin-bottom:3px}
 @media(max-width:760px){.login-form{grid-template-columns:1fr}.login-meta{display:grid;grid-template-columns:1fr}.login-meta span+span{border-left:0;border-top:1px solid var(--line)}.login-status-row{width:100%}}
+
+.organizer-link{display:inline-block;margin-top:16px;color:#65778b;font:9px monospace;letter-spacing:.14em;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}.organizer-link:hover{color:var(--cyan);border-bottom-color:var(--cyan)}

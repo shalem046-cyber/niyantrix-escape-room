@@ -108,33 +108,6 @@
     }
   }
 
-  function attemptLogin() {
-    const id = $('#loginId').value.trim().replace(/\s+/g, ' ');
-    const key = $('#accessKey').value.trim();
-
-    if (id.length < 2 || key.length < 4) {
-      $('#loginSession').textContent = 'CHECK INPUT';
-      $('#loginSession').className = 'warning';
-      $('#bootStatus').textContent = 'INPUT NEEDED';
-      $('#loginMessage').textContent = 'Enter a team name and a session code of at least 4 characters.';
-      return;
-    }
-
-    state.teamName = id.slice(0, 18).toUpperCase();
-    $('#loginSession').textContent = 'READY';
-    $('#loginSession').className = 'cyan';
-    $('#bootStatus').textContent = 'SESSION: READY';
-    $('#loginMessage').innerHTML = '<strong>SESSION ACCEPTED</strong> · Launching recovery mode…';
-    $('#enterBtn').disabled = true;
-    $('#enterBtn').textContent = 'STARTING…';
-
-    setTimeout(() => {
-      $('#enterBtn').disabled = false;
-      $('#enterBtn').textContent = 'ENTER MISSION';
-      launchMission();
-    }, 320);
-  }
-
   function glitch() {
     $('#glitchFlash').classList.remove('active');
     void $('#glitchFlash').offsetWidth;
@@ -468,9 +441,6 @@
     toast('System trace exposed. -30 sec');
   }
 
-  $('#enterBtn').addEventListener('click', attemptLogin);
-  $('#loginId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-  $('#accessKey').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
   $('#hintBtn').addEventListener('click', requestHint);
@@ -539,5 +509,6 @@
     }
   });
 
+  launchMission();
   renderTimer();
 })();

@@ -409,10 +409,43 @@
     renderTimer();
   }
 
+  function attemptLogin() {
+    const id = $('#loginId').value.trim().replace(/\s+/g, ' ');
+    const key = $('#accessKey').value.trim();
+
+    if (id.length < 2 || key.length < 4) {
+      $('#loginSession').textContent = 'CHECK';
+      $('#loginSession').className = 'warning';
+      $('#bootStatus').textContent = 'INPUT NEEDED';
+      $('#loginMessage').textContent = 'Enter a team name and an access code of at least 4 characters.';
+      return;
+    }
+
+    if (key.toUpperCase() !== 'NXR26') {
+      $('#loginSession').textContent = 'DENIED';
+      $('#loginSession').className = 'danger';
+      $('#bootStatus').textContent = 'ACCESS DENIED';
+      $('#loginMessage').textContent = 'Incorrect access code. Please check the code provided by the organizer.';
+      return;
+    }
+
+    state.teamName = id.slice(0, 18).toUpperCase();
+    $('#loginSession').textContent = 'GRANTED';
+    $('#loginSession').className = 'cyan';
+    $('#bootStatus').textContent = 'SESSION READY';
+    $('#loginMessage').innerHTML = '<strong>ACCESS GRANTED</strong> · Launching mission…';
+    $('#enterBtn').disabled = true;
+    $('#enterBtn').textContent = 'STARTING…';
+
+    setTimeout(() => {
+      $('#enterBtn').disabled = false;
+      $('#enterBtn').textContent = 'ENTER MISSION';
+      launchMission();
+    }, 300);
+  }
+
   function launchMission() {
     state.started = true;
-    const enteredName = $('#loginId')?.value.trim().replace(/\s+/g, ' ');
-    if (enteredName) state.teamName = enteredName.slice(0, 18).toUpperCase();
     $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
     show('board');
@@ -440,6 +473,10 @@
     $('#hintPanel').classList.remove('hidden');
     toast('System trace exposed. -30 sec');
   }
+
+  $('#enterBtn').addEventListener('click', attemptLogin);
+  $('#loginId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+  $('#accessKey').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
 
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
@@ -509,6 +546,5 @@
     }
   });
 
-  launchMission();
   renderTimer();
 })();

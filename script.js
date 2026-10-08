@@ -14,6 +14,7 @@
     loginAttempts: 0,
     wrongClicks: 0,
     creatorUnlocked: false,
+    adminStartedAt: 0,
   };
 
   const $ = (s, root = document) => root.querySelector(s);
@@ -32,6 +33,80 @@
     return `NODE-${missionToken()}-${Math.floor(10 + Math.random() * 90)}`;
   }
 
+  const ADMIN_STORAGE_KEY = 'niyantrix_admin_sessions_v1';
+
+  function readAdminSessions() {
+    try {
+      return JSON.parse(localStorage.getItem(ADMIN_STORAGE_KEY) || '[]');
+    } catch {
+      return [];
+    }
+  }
+
+  function writeAdminSessions(sessions) {
+    try {
+      localStorage.setItem(ADMIN_STORAGE_KEY, JSON.stringify(sessions));
+    } catch {}
+  }
+
+  function upsertAdminSession(patch) {
+    const sessions = readAdminSessions();
+    const index = sessions.findIndex(item => item.missionId === state.missionId);
+    const existing = index >= 0 ? sessions[index] : {
+      missionId: state.missionId,
+      teamName: state.teamName || 'UNNAMED',
+      startedAt: new Date().toISOString(),
+      status: 'Active',
+      lastSeen: new Date().toISOString(),
+      finishedAt: '',
+      durationSeconds: 0,
+      errors: 0,
+      hints: 0
+    };
+    const updated = { ...existing, ...patch, lastSeen: new Date().toISOString() };
+    if (index >= 0) sessions[index] = updated;
+    else sessions.unshift(updated);
+    writeAdminSessions(sessions.slice(0, 200));
+  }
+
+  function trackMissionStart() {
+    state.adminStartedAt = Date.now();
+    upsertAdminSession({
+      teamName: state.teamName || 'UNNAMED',
+      status: 'Active',
+      startedAt: new Date(state.adminStartedAt).toISOString(),
+      finishedAt: '',
+      durationSeconds: 0,
+      errors: 0,
+      hints: 0
+    });
+  }
+
+  function trackMissionProgress() {
+    if (!state.missionId || !state.started) return;
+    const durationSeconds = Math.max(0, Math.round((Date.now() - (state.adminStartedAt || Date.now())) / 1000));
+    upsertAdminSession({
+      teamName: state.teamName || 'UNNAMED',
+      status: 'Active',
+      durationSeconds,
+      errors: state.mistakes,
+      hints: state.hints
+    });
+  }
+
+  function trackMissionEnd(status) {
+    const durationSeconds = Math.max(0, Math.round((Date.now() - (state.adminStartedAt || Date.now())) / 1000));
+    upsertAdminSession({
+      teamName: state.teamName || 'UNNAMED',
+      status,
+      finishedAt: new Date().toISOString(),
+      durationSeconds,
+      errors: state.mistakes,
+      hints: state.hints
+    });
+  }
+
+
   function renderTimer() {
     const safeTime = Math.max(0, state.time);
     const m = String(Math.floor(safeTime / 60)).padStart(2, '0');
@@ -46,6 +121,7 @@
       if (!state.started) return;
       state.time -= 1;
       renderTimer();
+      trackMissionProgress();
       if (state.time <= 0) {
         state.time = 0;
         renderTimer();
@@ -383,6 +459,7 @@
     clearInterval(state.interval);
     state.interval = null;
     state.started = false;
+    trackMissionEnd('Timed Out');
     $('#hintPanel').classList.add('hidden');
     show('failView');
   }
@@ -445,6 +522,7 @@
     state.started = true;
     $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
+    trackMissionStart();
     show('board');
     startTimer();
   }
@@ -453,6 +531,7 @@
     state.started = true;
     $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
+    trackMissionStart();
     show('board');
     startTimer();
   }
@@ -504,6 +583,7 @@
       clearInterval(state.interval);
       state.interval = null;
       state.started = false;
+      trackMissionEnd('Completed');
       const elapsed = (10 * 60) - state.time;
       const mins = Math.floor(elapsed / 60);
       const secs = String(elapsed % 60).padStart(2, '0');
@@ -541,6 +621,10 @@
       $('#hintPanel').classList.remove('hidden');
       clicks = 0;
     }
+  });
+
+  window.addEventListener('beforeunload', () => {
+    if (state.missionId && state.started) trackMissionEnd('Offline');
   });
 
   window.NXR_START = startSession;

@@ -413,19 +413,11 @@
     const id = $('#loginId').value.trim().replace(/\s+/g, ' ');
     const key = $('#accessKey').value.trim();
 
-    if (id.length < 2 || key.length < 4) {
+    if (id.length < 2 || key.length < 1) {
       $('#loginSession').textContent = 'CHECK';
       $('#loginSession').className = 'warning';
       $('#bootStatus').textContent = 'INPUT NEEDED';
-      $('#loginMessage').textContent = 'Enter a team name and an access code of at least 4 characters.';
-      return;
-    }
-
-    if (key.toUpperCase() !== 'NXR26') {
-      $('#loginSession').textContent = 'DENIED';
-      $('#loginSession').className = 'danger';
-      $('#bootStatus').textContent = 'ACCESS DENIED';
-      $('#loginMessage').textContent = 'Incorrect access code. Please check the code provided by the organizer.';
+      $('#loginMessage').textContent = 'Enter a team name and any access code to begin.';
       return;
     }
 
@@ -433,7 +425,7 @@
     $('#loginSession').textContent = 'GRANTED';
     $('#loginSession').className = 'cyan';
     $('#bootStatus').textContent = 'SESSION READY';
-    $('#loginMessage').innerHTML = '<strong>ACCESS GRANTED</strong> · Launching mission…';
+    $('#loginMessage').innerHTML = '<strong>ACCESS GRANTED</strong> · Starting your mission…';
     $('#enterBtn').disabled = true;
     $('#enterBtn').textContent = 'STARTING…';
 

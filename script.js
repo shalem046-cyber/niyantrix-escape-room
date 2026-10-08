@@ -109,37 +109,31 @@
   }
 
   function attemptLogin() {
-    const id = $('#loginId').value.trim().toUpperCase();
-    const key = $('#accessKey').value.trim().toUpperCase();
-    state.loginAttempts += 1;
+    const id = $('#loginId').value.trim().replace(/\s+/g, ' ');
+    const key = $('#accessKey').value.trim();
 
-    if (id === 'ARCHITECT' && key === 'PX//7F-ACCESS') {
-      state.creatorUnlocked = true;
-      $('#loginSession').textContent = 'GRANTED';
-      $('#loginSession').className = 'cyan';
-      $('#bootStatus').textContent = 'SESSION: GRANTED';
-      $('#loginMessage').innerHTML = '<strong>CREATOR ACCESS</strong> · ACCESS GRANTED ✓';
-      $('#fakeButtons').innerHTML = '';
-      $('#enterBtn').textContent = 'ENTER RECOVERY MODE';
-      $('#enterBtn').classList.remove('dodging');
-      $('#wrongClickCounter').textContent = `CREATOR AUTHENTICATED · ATTEMPTS: ${state.loginAttempts}`;
-      setTimeout(launchMission, 520);
+    if (id.length < 2 || key.length < 4) {
+      $('#loginSession').textContent = 'CHECK INPUT';
+      $('#loginSession').className = 'warning';
+      $('#bootStatus').textContent = 'INPUT NEEDED';
+      $('#loginMessage').textContent = 'Enter a team name and a session code of at least 4 characters.';
       return;
     }
 
-    $('#loginSession').textContent = 'REJECTED';
-    $('#loginSession').className = 'danger';
-    $('#bootStatus').textContent = 'ACCESS DENIED';
-    $('#loginMessage').textContent =
-      state.loginAttempts === 1
-        ? 'Credentials rejected. The interface has become less cooperative.'
-        : state.loginAttempts === 2
-          ? 'Incorrect. There are now several buttons. Only one of them is useful.'
-          : 'Authentication failure. Stop trusting the obvious controls.';
-    spawnFakeButtons();
-    if (state.loginAttempts >= 2) $('#enterBtn').classList.add('dodging');
-    glitch();
-    toast(state.loginAttempts === 1 ? 'ACCESS DENIED' : 'SYSTEM: NICE TRY.');
+    state.teamName = id.slice(0, 18).toUpperCase();
+    state.creatorUnlocked = false;
+    $('#loginSession').textContent = 'READY';
+    $('#loginSession').className = 'cyan';
+    $('#bootStatus').textContent = 'SESSION: READY';
+    $('#loginMessage').innerHTML = '<strong>SESSION ACCEPTED</strong> · Launching recovery mode…';
+    $('#enterBtn').disabled = true;
+    $('#enterBtn').textContent = 'STARTING…';
+
+    setTimeout(() => {
+      $('#enterBtn').disabled = false;
+      $('#enterBtn').textContent = 'ENTER MISSION';
+      launchMission();
+    }, 320);
   }
 
   function glitch() {
@@ -445,8 +439,9 @@
 
   function launchMission() {
     state.started = true;
-    state.teamName = 'ARCHITECT';
-    $('#teamStatus').textContent = state.teamName;
+    const enteredName = $('#loginId')?.value.trim().replace(/\s+/g, ' ');
+    if (enteredName) state.teamName = enteredName.slice(0, 18).toUpperCase();
+    $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
     show('board');
     startTimer();
@@ -454,7 +449,7 @@
 
   function restart() {
     state.started = true;
-    $('#teamStatus').textContent = state.teamName;
+    $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
     show('board');
     startTimer();
@@ -477,7 +472,6 @@
   $('#enterBtn').addEventListener('click', attemptLogin);
   $('#loginId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
   $('#accessKey').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-  $('#closeReaction').addEventListener('click', () => $('#reactionModal').classList.add('hidden'));
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
   $('#hintBtn').addEventListener('click', requestHint);
@@ -519,7 +513,6 @@
       show('successView');
       return;
     }
-    mistake('Final authorization rejected.');
     feedback.className = 'feedback bad';
     feedback.textContent = 'The phrase is not yet reconstructed correctly.';
     mistake('Final authorization rejected.');

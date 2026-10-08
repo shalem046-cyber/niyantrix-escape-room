@@ -121,7 +121,6 @@
     }
 
     state.teamName = id.slice(0, 18).toUpperCase();
-    state.creatorUnlocked = false;
     $('#loginSession').textContent = 'READY';
     $('#loginSession').className = 'cyan';
     $('#bootStatus').textContent = 'SESSION: READY';

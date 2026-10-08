@@ -27,7 +27,44 @@
   </header>
 
   <main class="shell">
-    <section id="board" class="screen active">
+    <section id="login" class="screen active">
+      <div class="clean-login">
+        <span class="eyebrow">NIYANTRIX'26 · ESCAPE ROOM</span>
+        <div class="login-logo">NXR<span>//</span></div>
+        <h1>MISSION ACCESS</h1>
+        <p class="muted hero-copy">Enter your team name and access code to begin the recovery mission.</p>
+
+        <div class="terminal-card login-card">
+          <div class="terminal-head"><span>MISSION ACCESS</span><span id="bootStatus">STANDBY</span></div>
+          <div class="terminal-body">
+            <div class="login-status-row">
+              <span>&gt; NETWORK</span><strong class="cyan">ONLINE</strong>
+              <span>&gt; SESSION</span><strong id="loginSession" class="warning">LOCKED</strong>
+            </div>
+
+            <div class="login-form">
+              <label>TEAM NAME
+                <input id="loginId" class="team-input" maxlength="24" placeholder="ENTER TEAM NAME" autocomplete="off" />
+              </label>
+              <label>ACCESS CODE
+                <input id="accessKey" class="team-input" type="password" maxlength="24" placeholder="ENTER ACCESS CODE" autocomplete="off" />
+              </label>
+            </div>
+
+            <div id="loginMessage" class="login-message">Enter the credentials provided for this mission.</div>
+            <button id="enterBtn" class="primary-btn login-submit">ENTER MISSION</button>
+          </div>
+        </div>
+
+        <div class="login-meta">
+          <span><strong>16:00</strong> TIME LIMIT</span>
+          <span><strong>05</strong> RECOVERY NODES</span>
+          <span><strong>01</strong> FINAL PHRASE</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="board" class="screen">
       <div class="board-header">
         <div>
           <span class="eyebrow">LIVE RECOVERY BOARD</span>

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#05070b" />
   <title>NIYANTRIX // Escape Room</title>
-  <link rel="stylesheet" href="style.css?v=20261008-3" />
+  <link rel="stylesheet" href="style.css?v=20261008-4" />
 </head>
 <body>
   <!--
@@ -32,7 +32,7 @@
         <span class="eyebrow">NIYANTRIX'26 · ESCAPE ROOM</span>
         <div class="login-logo">NXR<span>//</span></div>
         <h1>MISSION ACCESS</h1>
-        <p class="muted hero-copy">Enter your team name and access code to begin the recovery mission.</p>
+        <p class="muted hero-copy">Choose a team name and any access code. No account or fixed code is required.</p>
 
         <div class="terminal-card login-card">
           <div class="terminal-head"><span>MISSION ACCESS</span><span id="bootStatus">STANDBY</span></div>
@@ -44,15 +44,15 @@
 
             <div class="login-form">
               <label>TEAM NAME
-                <input id="loginId" class="team-input" maxlength="24" placeholder="ENTER TEAM NAME" autocomplete="off" />
+                <input id="teamNameField" class="team-input" maxlength="24" placeholder="ENTER TEAM NAME" autocomplete="off" />
               </label>
-              <label>ACCESS CODE
-                <input id="accessKey" class="team-input" type="password" maxlength="24" placeholder="ENTER ACCESS CODE" autocomplete="off" />
+              <label>ACCESS CODE · ANY VALUE
+                <input id="sessionCodeField" class="team-input" type="password" maxlength="24" placeholder="ENTER ACCESS CODE" autocomplete="off" />
               </label>
             </div>
 
             <div id="loginMessage" class="login-message">Enter the credentials provided for this mission.</div>
-            <button id="enterBtn" class="primary-btn login-submit">ENTER MISSION</button>
+            <button id="startMissionBtn" class="primary-btn login-submit" type="button">CREATE SESSION</button>
           </div>
         </div>
 
@@ -181,6 +181,6 @@
     <pre id="hintText"></pre>
   </div>
 
-  <script src="script.js?v=20261008-3"></script>
+  <script src="script.js?v=20261008-4"></script>
 </body>
 </html>

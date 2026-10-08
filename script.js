@@ -409,32 +409,37 @@
     renderTimer();
   }
 
-  function attemptLogin() {
-    const id = $('#loginId').value.trim().replace(/\s+/g, ' ');
-    const key = $('#accessKey').value.trim();
+  function startSession() {
+    const id = $('#teamNameField').value.trim().replace(/\s+/g, ' ');
+    const key = $('#sessionCodeField').value.trim();
 
-    if (id.length < 2 || key.length < 1) {
-      $('#loginSession').textContent = 'CHECK';
+    if (id.length < 1) {
+      $('#loginSession').textContent = 'READY';
       $('#loginSession').className = 'warning';
-      $('#bootStatus').textContent = 'INPUT NEEDED';
-      $('#loginMessage').textContent = 'Enter a team name and any access code to begin.';
+      $('#bootStatus').textContent = 'TEAM NAME NEEDED';
+      $('#loginMessage').textContent = 'Enter a team name to create your session.';
+      $('#teamNameField').focus();
       return;
     }
 
     state.teamName = id.slice(0, 18).toUpperCase();
-    $('#loginSession').textContent = 'GRANTED';
+    state.started = false;
+    $('#loginSession').textContent = 'READY';
     $('#loginSession').className = 'cyan';
-    $('#bootStatus').textContent = 'SESSION READY';
-    $('#loginMessage').innerHTML = '<strong>ACCESS GRANTED</strong> · Starting your mission…';
-    $('#enterBtn').disabled = true;
-    $('#enterBtn').textContent = 'STARTING…';
+    $('#bootStatus').textContent = 'SESSION CREATED';
+    $('#loginMessage').textContent = key
+      ? 'Session created. Starting the recovery mission…'
+      : 'Session created. Starting the recovery mission…';
+    $('#startMissionBtn').disabled = true;
+    $('#startMissionBtn').textContent = 'STARTING…';
 
     setTimeout(() => {
-      $('#enterBtn').disabled = false;
-      $('#enterBtn').textContent = 'ENTER MISSION';
+      $('#startMissionBtn').disabled = false;
+      $('#startMissionBtn').textContent = 'CREATE SESSION';
       launchMission();
-    }, 300);
+    }, 250);
   }
+
 
   function launchMission() {
     state.started = true;
@@ -466,9 +471,9 @@
     toast('System trace exposed. -30 sec');
   }
 
-  $('#enterBtn').addEventListener('click', attemptLogin);
-  $('#loginId').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
-  $('#accessKey').addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+  $('#startMissionBtn').addEventListener('click', startSession);
+  $('#teamNameField').addEventListener('keydown', (e) => { if (e.key === 'Enter') startSession(); });
+  $('#sessionCodeField').addEventListener('keydown', (e) => { if (e.key === 'Enter') startSession(); });
 
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
@@ -538,5 +543,6 @@
     }
   });
 
+  window.NXR_START = startSession;
   renderTimer();
 })();

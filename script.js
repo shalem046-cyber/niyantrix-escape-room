@@ -1,7 +1,7 @@
 (() => {
   const state = {
     started: false,
-    time: 15 * 60,
+    time: 10 * 60,
     interval: null,
     mistakes: 0,
     hints: 0,
@@ -388,7 +388,7 @@
   }
 
   function resetBoard() {
-    state.time = 15 * 60;
+    state.time = 10 * 60;
     state.mistakes = 0;
     state.hints = 0;
     state.fragments = [];
@@ -504,7 +504,7 @@
       clearInterval(state.interval);
       state.interval = null;
       state.started = false;
-      const elapsed = (15 * 60) - state.time;
+      const elapsed = (10 * 60) - state.time;
       const mins = Math.floor(elapsed / 60);
       const secs = String(elapsed % 60).padStart(2, '0');
       $('#successStats').innerHTML = `

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#05070b" />
-  <title>404 // Recovery Node</title>
+  <title>NIYANTRIX // Escape Room</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -28,41 +28,45 @@
 
   <main class="shell">
     <section id="landing" class="screen active">
-      <div class="error-code">PX//</div>
-      <div class="eyebrow">PARADOX//ACCESS · RESTRICTED NODE</div>
-      <h1>AUTHENTICATION REQUIRED</h1>
-      <p class="muted hero-copy">The interface is watching. Enter valid credentials to establish a recovery session.</p>
+      <div class="access-hero">
+        <span class="eyebrow">NIYANTRIX'26 · ESCAPE ROOM</span>
+        <div class="access-mark">NXR<span>//</span>01</div>
+        <h1>ENTER THE MISSION</h1>
+        <p class="muted hero-copy">A clean entry point to the recovery network. Set your team identity, enter your session code, and begin.</p>
 
-      <div class="terminal-card login-card">
-        <div class="terminal-head"><span>SECURE ACCESS CONSOLE</span><span id="bootStatus">STANDBY</span></div>
-        <div class="terminal-body">
-          <div class="login-line">&gt; node status: <span class="cyan">ONLINE</span></div>
-          <div class="login-line">&gt; session: <span id="loginSession" class="warning">UNAUTHENTICATED</span></div>
-          <div class="login-form">
-            <label>IDENTIFIER<input id="loginId" class="team-input" maxlength="24" placeholder="ENTER IDENTIFIER" autocomplete="off" /></label>
-            <label>ACCESS KEY<input id="accessKey" class="team-input" maxlength="32" placeholder="ENTER ACCESS KEY" autocomplete="off" /></label>
-          </div>
-          <div id="loginMessage" class="login-message">Awaiting credentials...</div>
-          <div id="fakeButtons" class="fake-buttons" aria-live="polite"></div>
-          <div class="start-row login-actions">
-            <button id="enterBtn" class="ghost-btn authenticate-btn">AUTHENTICATE</button>
+        <div class="terminal-card login-card">
+          <div class="terminal-head"><span>MISSION ACCESS</span><span id="bootStatus">READY</span></div>
+          <div class="terminal-body">
+            <div class="login-line">&gt; node status: <span class="cyan">ONLINE</span></div>
+            <div class="login-line">&gt; session: <span id="loginSession" class="cyan">READY</span></div>
+
+            <div class="login-form">
+              <label>
+                TEAM NAME
+                <input id="loginId" class="team-input" maxlength="24" placeholder="ENTER TEAM NAME" autocomplete="off" />
+              </label>
+              <label>
+                SESSION CODE
+                <input id="accessKey" class="team-input" maxlength="24" placeholder="4+ CHARACTERS" autocomplete="off" />
+              </label>
+            </div>
+
+            <div id="loginMessage" class="login-message">No account required. This session runs locally in your browser.</div>
+
+            <div class="start-row login-actions">
+              <button id="enterBtn" class="ghost-btn authenticate-btn">ENTER MISSION</button>
+            </div>
           </div>
         </div>
+
+        <div class="access-stats">
+          <span><strong>16:00</strong> TIME LIMIT</span>
+          <span><strong>5</strong> RECOVERY NODES</span>
+          <span><strong>1</strong> FINAL PHRASE</span>
+        </div>
+        <div class="micro-copy">Everything you need to solve the mission is inside the interface.</div>
       </div>
-      <div id="wrongClickCounter" class="micro-copy">WRONG CLICKS: 0 · ATTEMPTS: 0</div>
-      <div class="micro-copy">The website is part of the puzzle. Not every button is telling the truth.</div>
     </section>
-
-    <div id="reactionModal" class="reaction-modal hidden" role="dialog" aria-live="assertive">
-      <div class="reaction-card">
-        <div class="reaction-top"><span>PARADOX//SYSTEM</span><button id="closeReaction" aria-label="Close">×</button></div>
-        <div class="reaction-frame">
-          <img id="reactionImage" alt="System reaction" src="assets/memes/reaction-1.jpg" />
-          <div id="reactionFallback" class="reaction-fallback">🤨<br><strong>WRONG BUTTON.</strong></div>
-        </div>
-        <div id="reactionText" class="reaction-text">That was not the button.</div>
-      </div>
-    </div>
 
     <section id="board" class="screen">
       <div class="board-header">

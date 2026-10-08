@@ -11,11 +11,14 @@
     teamName: 'UNNAMED',
     finalAttempts: 0,
     orderKey: [],
+    loginAttempts: 0,
+    wrongClicks: 0,
+    creatorUnlocked: false,
   };
 
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
-  const screens = ['login', 'landing', 'board', 'moduleView', 'finalView', 'successView', 'failView'];
+  const screens = ['landing', 'board', 'moduleView', 'finalView', 'successView', 'failView'];
 
   function show(id) {
     screens.forEach(name => document.getElementById(name).classList.toggle('active', name === id));
@@ -57,6 +60,52 @@
     el.classList.add('show');
     clearTimeout(toast._t);
     toast._t = setTimeout(() => el.classList.remove('show'), 2100);
+  }
+
+  function showReaction(message = 'WRONG BUTTON 😭') {
+    const modal = $('#reactionModal');
+    if (!modal) return;
+    $('#reactionText').textContent = message;
+    const img = $('#reactionImage');
+    const fallback = $('#reactionFallback');
+    if (img) {
+      img.onerror = () => {
+        img.style.display = 'none';
+        fallback.classList.add('show');
+      };
+      img.style.display = 'block';
+      fallback.classList.remove('show');
+      img.src = state.wrongClicks % 2 === 0
+        ? 'assets/memes/reaction-2.jpg'
+        : 'assets/memes/reaction-1.jpg';
+    }
+    modal.classList.remove('hidden');
+    clearTimeout(showReaction._t);
+    showReaction._t = setTimeout(() => modal.classList.add('hidden'), 1150);
+  }
+
+  function spawnFakeButtons() {
+    const box = $('#fakeButtons');
+    if (!box) return;
+    const labels = ['VERIFY','CONTINUE','I AM HUMAN','CONFIRM','OVERRIDE','PROCEED','TRUST ME','ACCESS','VALIDATE','UNLOCK'];
+    const count = Math.min(3 + Math.max(0, state.loginAttempts - 1) * 2, 10);
+    box.innerHTML = '';
+    for (let i = 0; i < count; i += 1) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'fake-auth-btn';
+      btn.textContent = labels[i];
+      btn.addEventListener('click', () => {
+        state.wrongClicks += 1;
+        $('#wrongClickCounter').textContent = `WRONG CLICKS: ${state.wrongClicks} · ATTEMPTS: ${state.loginAttempts}`;
+        btn.classList.add('wrong-hit');
+        glitch();
+        showReaction(state.wrongClicks > 4 ? 'YOU KEEP CLICKING THE TRAPS. 😭' : 'WRONG BUTTON 😭');
+        toast('FALSE CONTROL DETECTED');
+        setTimeout(() => btn.remove(), 260);
+      });
+      box.appendChild(btn);
+    }
   }
 
   function glitch() {
@@ -143,171 +192,6 @@
       }
     });
   }
-
-
-
-  // =========================
-  // NIYANTRIX AUTHENTICATION
-  // This is a puzzle gate, not real account security.
-  // Secret route: brand x3 -> Shift + system dot -> creator key.
-  // Creator key is encoded so it is not plainly visible in the UI.
-  // =========================
-  const auth = {
-    attempts: 0,
-    locked: false,
-    brandClicks: 0,
-    brandTimer: null,
-    armed: false,
-    keyIndex: 0,
-    unlocked: false
-  };
-
-  const creatorKey = atob('TlhSMjY=');
-
-  function authFeedback(message, type = '') {
-    const el = $('#authFeedback');
-    if (!el) return;
-    el.textContent = '> ' + message;
-    el.className = 'auth-console' + (type ? ' ' + type : '');
-  }
-
-  function authLockUI() {
-    const card = document.querySelector('.auth-card');
-    const button = $('#authBtn');
-    $('#authAttempts').textContent = `ATTEMPTS: ${auth.attempts}`;
-    $('#authLock').textContent = auth.locked ? 'LOCK: SEALED' : 'LOCK: OPEN';
-
-    if (auth.locked) {
-      card?.classList.add('locked');
-      button.disabled = true;
-      $('#authStateLabel').textContent = 'DIRECT AUTHENTICATION REFUSED';
-      $('#authSignal').textContent = '● HOSTILE';
-      $('#authSignal').style.color = 'var(--red)';
-      authFeedback('three credential signatures rejected. direct path sealed.', 'bad');
-    }
-  }
-
-  function rejectCredential() {
-    if (auth.unlocked) return;
-    auth.attempts += 1;
-    glitch();
-
-    if (auth.attempts >= 3) {
-      auth.locked = true;
-      authLockUI();
-      authFeedback('direct credential path sealed. the interface is still listening.', 'bad');
-      return;
-    }
-
-    $('#authAttempts').textContent = `ATTEMPTS: ${auth.attempts}`;
-    $('#authLock').textContent = `LOCK: ${3 - auth.attempts} CHANCES LEFT`;
-    authFeedback(
-      auth.attempts === 1
-        ? 'credential signature rejected. that was expected.'
-        : 'credential signature rejected. stop guessing.',
-      'bad'
-    );
-  }
-
-  function unlockCreator() {
-    auth.unlocked = true;
-    auth.armed = false;
-    auth.locked = false;
-
-    const card = document.querySelector('.auth-card');
-    card?.classList.remove('locked');
-    card?.classList.add('override');
-
-    $('#authStateLabel').textContent = 'CREATOR OVERRIDE ACCEPTED';
-    $('#authLevel').textContent = 'LEVEL: ARCHITECT';
-    $('#authSignal').textContent = '● ONLINE';
-    $('#authSignal').style.color = 'var(--green)';
-    $('#authLock').textContent = 'LOCK: OVERRIDE';
-    $('#authAttempts').textContent = `ATTEMPTS: ${auth.attempts}`;
-    $('#authBtn').textContent = 'ACCESS GRANTED';
-    $('#authBtn').disabled = true;
-    authFeedback('override channel accepted. welcome, architect.', 'ok');
-    glitch();
-
-    setTimeout(() => {
-      $('#timer').textContent = 'LOCKED';
-      show('landing');
-    }, 1100);
-  }
-
-  $('#authBtn').addEventListener('click', () => {
-    if (!auth.locked && !auth.unlocked) {
-      rejectCredential();
-      return;
-    }
-    if (auth.locked && !auth.unlocked) {
-      authFeedback('the terminal is sealed. the system is waiting for a different kind of proof.', 'bad');
-    }
-  });
-
-  $('#authPass').addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      $('#authBtn').click();
-    }
-  });
-
-  $('#authBrand').addEventListener('click', () => {
-    if (!auth.locked || auth.unlocked) return;
-
-    const now = Date.now();
-    if (!auth.brandTimer || now - auth.brandTimer > 1200) {
-      auth.brandClicks = 0;
-    }
-    auth.brandTimer = now;
-    auth.brandClicks += 1;
-
-    if (auth.brandClicks === 1) {
-      authFeedback('...brand channel listening.', '');
-    } else if (auth.brandClicks === 2) {
-      authFeedback('auxiliary channel detected. continue.', '');
-    } else if (auth.brandClicks === 3) {
-      authFeedback('channel primed. one more non-credential signal required.', '');
-    } else if (auth.brandClicks > 3) {
-      auth.brandClicks = 0;
-      authFeedback('channel desynchronised. start again.', 'bad');
-    }
-  });
-
-  $('#systemDot').addEventListener('click', (event) => {
-    if (!auth.locked || auth.unlocked) return;
-
-    if (event.shiftKey && auth.brandClicks === 3) {
-      auth.armed = true;
-      auth.keyIndex = 0;
-      authFeedback('secondary signal accepted. creator channel armed.', '');
-      return;
-    }
-
-    if (auth.brandClicks === 3) {
-      authFeedback('wrong signal. the system expected a modified input.', 'bad');
-    }
-  });
-
-  document.addEventListener('keydown', (event) => {
-    if (!auth.locked || !auth.armed || auth.unlocked) return;
-
-    const key = event.key.length === 1 ? event.key.toUpperCase() : event.key.toUpperCase();
-    if (key === creatorKey[auth.keyIndex]) {
-      auth.keyIndex += 1;
-      authFeedback(`creator channel: ${auth.keyIndex}/${creatorKey.length}`, '');
-      if (auth.keyIndex === creatorKey.length) {
-        unlockCreator();
-      }
-      return;
-    }
-
-    if (key !== 'SHIFT' && key !== 'CONTROL' && key !== 'ALT') {
-      auth.keyIndex = 0;
-      auth.armed = false;
-      authFeedback('creator signal mismatch. channel reset.', 'bad');
-    }
-  });
 
   const modules = {
     signal: {
@@ -527,8 +411,9 @@
 
   function launchMission() {
     state.started = true;
-    state.teamName = ($('#teamName').value.trim() || 'UNNAMED').slice(0, 18).toUpperCase();
-    $('#teamStatus').textContent = state.teamName;
+    const enteredName = $('#loginId')?.value.trim().replace(/\s+/g, ' ');
+    if (enteredName) state.teamName = enteredName.slice(0, 18).toUpperCase();
+    $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
     show('board');
     startTimer();
@@ -536,8 +421,7 @@
 
   function restart() {
     state.started = true;
-    $('#teamName').value = state.teamName === 'UNNAMED' ? '' : state.teamName;
-    $('#teamStatus').textContent = state.teamName;
+    $('#teamStatus').textContent = state.teamName || 'UNNAMED';
     resetBoard();
     show('board');
     startTimer();
@@ -557,8 +441,6 @@
     toast('System trace exposed. -30 sec');
   }
 
-  $('#enterBtn').addEventListener('click', launchMission);
-  $('#teamName').addEventListener('keydown', (e) => { if (e.key === 'Enter') launchMission(); });
   $$('.module-btn').forEach(btn => btn.addEventListener('click', () => openModule(btn.dataset.open)));
   $('#backBtn').addEventListener('click', () => show('board'));
   $('#hintBtn').addEventListener('click', requestHint);
@@ -600,7 +482,6 @@
       show('successView');
       return;
     }
-    mistake('Final authorization rejected.');
     feedback.className = 'feedback bad';
     feedback.textContent = 'The phrase is not yet reconstructed correctly.';
     mistake('Final authorization rejected.');
@@ -628,5 +509,6 @@
     }
   });
 
-  $('#timer').textContent = 'LOCKED';
+  launchMission();
+  renderTimer();
 })();

@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#05070b">
+  <title>NIYANTRIX // Admin Portal</title>
+  <style>
+    :root{--bg:#04060a;--panel:#0a1018;--line:#1d2a39;--text:#eef5ff;--muted:#7e90a5;--cyan:#6be7ff;--green:#76f0b0;--red:#ff647c;--amber:#ffc76e;--shadow:0 28px 90px rgba(0,0,0,.5)}
+    *{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{padding:28px}button,input{font:inherit}button{cursor:pointer}.wrap{width:min(1280px,100%);margin:0 auto}
+    .top{display:flex;align-items:center;gap:15px;padding:14px 0 22px;border-bottom:1px solid var(--line)}.mark{font:18px monospace;letter-spacing:.08em}.mark span{color:var(--cyan)}.sub{font:10px monospace;letter-spacing:.16em;color:var(--muted)}
+    .right{margin-left:auto;display:flex;gap:10px;align-items:center}.btn,.input{border:1px solid #2c4054;background:#081019;color:var(--text);padding:11px 14px}.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+    .login{min-height:76vh;display:grid;place-items:center}.card{background:linear-gradient(180deg,#0d141e,#070c12);border:1px solid var(--line);box-shadow:var(--shadow)}
+    .login-card{width:min(460px,100%);padding:28px}.eyebrow{font:10px monospace;letter-spacing:.18em;color:#63758b}.login-card h1{font-size:38px;margin:12px 0 8px}.muted{color:var(--muted);line-height:1.7}
+    label{display:block;font:10px monospace;letter-spacing:.12em;color:#71839a;margin-top:16px}.input{display:block;width:100%;margin-top:7px;outline:none}.input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(107,231,255,.08)}
+    .login-submit{width:100%;margin-top:18px}.error{min-height:20px;color:var(--red);font:11px monospace;margin-top:12px}.dashboard{display:none}.dashboard.show{display:block}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}.stat{padding:18px;border:1px solid var(--line);background:var(--panel)}
+    .stat span{display:block;font:9px monospace;letter-spacing:.13em;color:#65788d}.stat strong{display:block;font:27px monospace;margin-top:7px;color:var(--cyan)}
+    .panel{border:1px solid var(--line);background:var(--panel);overflow:hidden}.panel-head{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--line)}
+    .panel-head strong{font:12px monospace;letter-spacing:.1em}.panel-head small{color:var(--muted);margin-left:auto;font:10px monospace}.table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left}
+    th{font:9px monospace;letter-spacing:.12em;color:#65788d;background:#080d13}td{font-size:12px;color:#c6d4e3}td.mono{font-family:monospace}
+    .status{display:inline-flex;padding:5px 8px;border:1px solid #314153;font:9px monospace;letter-spacing:.08em}.status.Active{color:var(--cyan);border-color:rgba(107,231,255,.35)}
+    .status.Completed{color:var(--green);border-color:rgba(118,240,176,.35)}.status.Timed-Out,.status.Offline{color:var(--amber);border-color:rgba(255,199,110,.35)}
+    .empty{padding:34px;text-align:center;color:var(--muted);font:11px monospace}.footer-note{margin-top:14px;color:#596b80;font:10px/1.6 monospace}
+    @media(max-width:800px){body{padding:16px}.stats{grid-template-columns:1fr 1fr}.top{align-items:flex-start}.right{flex-wrap:wrap;justify-content:flex-end}}
+    @media(max-width:480px){.stats{grid-template-columns:1fr}.right{margin-left:0}.top{flex-direction:column}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="mark">NXR<span>//</span>ADMIN</div>
+    <div class="sub">ORGANIZER CONTROL PORTAL</div>
+    <div class="right" id="topActions" style="display:none">
+      <button class="btn" id="exportBtn">EXPORT CSV</button>
+      <button class="btn" id="clearBtn">CLEAR DATA</button>
+      <button class="btn" id="logoutBtn">LOG OUT</button>
+    </div>
+  </div>
+
+  <section class="login" id="loginView">
+    <div class="card login-card">
+      <div class="eyebrow">AUTHORIZED ORGANIZER ACCESS</div>
+      <h1>Admin Portal</h1>
+      <p class="muted">Monitor mission sessions from this browser.</p>
+      <label>USER ID
+        <input id="adminUser" class="input" autocomplete="username" placeholder="ENTER USER ID">
+      </label>
+      <label>PASSWORD
+        <input id="adminPass" class="input" type="password" autocomplete="current-password" placeholder="ENTER PASSWORD">
+      </label>
+      <button id="loginBtn" class="btn login-submit">ACCESS DASHBOARD</button>
+      <div id="loginError" class="error"></div>
+      <div class="footer-note">This GitHub Pages dashboard uses browser-local session data. It is not a central server database.</div>
+    </div>
+  </section>
+
+  <section class="dashboard" id="dashboard">
+    <div style="padding-top:26px">
+      <div class="eyebrow">LIVE MISSION MONITOR</div>
+      <h1 style="margin-bottom:0">Teams & Recovery Sessions</h1>
+      <p class="muted">Sessions update while the player keeps this tab active.</p>
+    </div>
+    <div class="stats">
+      <div class="stat"><span>TOTAL SESSIONS</span><strong id="totalStat">0</strong></div>
+      <div class="stat"><span>ACTIVE NOW</span><strong id="activeStat">0</strong></div>
+      <div class="stat"><span>COMPLETED</span><strong id="completeStat">0</strong></div>
+      <div class="stat"><span>AVG. COMPLETION</span><strong id="avgStat">—</strong></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><strong>SESSION LOG</strong><small id="updatedAt">—</small></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>TEAM</th><th>MISSION</th><th>STATUS</th><th>STARTED</th><th>FINISHED</th><th>DURATION</th><th>ERRORS</th><th>HINTS</th></tr></thead>
+          <tbody id="sessionBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="footer-note">For true multi-device tracking, connect this dashboard to a backend database such as Supabase or Firebase.</div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const ADMIN_USER = 'NXRADMIN';
+  const ADMIN_PASS = 'NXR@2026';
+  const KEY = 'niyantrix_admin_sessions_v1';
+  const $ = s => document.querySelector(s);
+
+  function read() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch { return []; }
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleString();
+  }
+
+  function fmtDuration(sec) {
+    const s = Math.max(0, Number(sec) || 0);
+    return String(Math.floor(s / 60)).padStart(2,'0') + ':' + String(s % 60).padStart(2,'0');
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, function(ch) {
+      return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]);
+    });
+  }
+
+  function render() {
+    const sessions = read();
+    const now = Date.now();
+
+    sessions.forEach(s => {
+      if (s.status === 'Active' && s.lastSeen) {
+        const age = now - new Date(s.lastSeen).getTime();
+        if (age > 90000) s.status = 'Offline';
+      }
+    });
+
+    const active = sessions.filter(s => s.status === 'Active').length;
+    const completed = sessions.filter(s => s.status === 'Completed').length;
+    const durations = sessions.filter(s => s.status === 'Completed').map(s => Number(s.durationSeconds) || 0);
+    const average = durations.length ? Math.round(durations.reduce((a,b) => a + b, 0) / durations.length) : 0;
+
+    $('#totalStat').textContent = sessions.length;
+    $('#activeStat').textContent = active;
+    $('#completeStat').textContent = completed;
+    $('#avgStat').textContent = average ? fmtDuration(average) : '—';
+    $('#updatedAt').textContent = 'Updated ' + new Date().toLocaleTimeString();
+
+    if (!sessions.length) {
+      $('#sessionBody').innerHTML = '<tr><td colspan="8" class="empty">NO MISSION SESSIONS RECORDED YET</td></tr>';
+      return;
+    }
+
+    $('#sessionBody').innerHTML = sessions.map(function(s) {
+      const safeStatus = String(s.status || 'Unknown').replace(/\\s+/g,'-');
+      return '<tr>' +
+        '<td><strong>' + escapeHtml(s.teamName || 'UNNAMED') + '</strong></td>' +
+        '<td class="mono">' + escapeHtml(s.missionId || '—') + '</td>' +
+        '<td><span class="status ' + safeStatus + '">' + escapeHtml(s.status || 'Unknown') + '</span></td>' +
+        '<td>' + fmtDate(s.startedAt) + '</td>' +
+        '<td>' + fmtDate(s.finishedAt) + '</td>' +
+        '<td class="mono">' + fmtDuration(s.durationSeconds) + '</td>' +
+        '<td class="mono">' + (Number(s.errors) || 0) + '</td>' +
+        '<td class="mono">' + (Number(s.hints) || 0) + '</td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  function exportCsv() {
+    const rows = [['Team','Mission ID','Status','Started At','Finished At','Duration (sec)','Errors','Hints']]
+      .concat(read().map(function(s) {
+        return [s.teamName,s.missionId,s.status,s.startedAt,s.finishedAt,s.durationSeconds,s.errors,s.hints];
+      }));
+    const csv = rows.map(function(row) {
+      return row.map(function(value) {
+        return '"' + String(value ?? '').replace(/"/g,'""') + '"';
+      }).join(',');
+    }).join('\\n');
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'niyantrix-session-log.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function login() {
+    const user = $('#adminUser').value.trim().toUpperCase();
+    const pass = $('#adminPass').value;
+    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+      sessionStorage.setItem('niyantrix_admin_auth','1');
+      $('#loginView').style.display = 'none';
+      $('#dashboard').classList.add('show');
+      $('#topActions').style.display = 'flex';
+      render();
+    } else {
+      $('#loginError').textContent = 'Invalid administrator credentials.';
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem('niyantrix_admin_auth');
+    location.reload();
+  }
+
+  function clearData() {
+    if (!confirm('Clear all locally stored NIYANTRIX session data on this browser?')) return;
+    localStorage.removeItem(KEY);
+    render();
+  }
+
+  $('#loginBtn').addEventListener('click', login);
+  $('#adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  $('#adminUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+  $('#logoutBtn').addEventListener('click', logout);
+  $('#clearBtn').addEventListener('click', clearData);
+  $('#exportBtn').addEventListener('click', exportCsv);
+
+  if (sessionStorage.getItem('niyantrix_admin_auth') === '1') {
+    $('#loginView').style.display = 'none';
+    $('#dashboard').classList.add('show');
+    $('#topActions').style.display = 'flex';
+  }
+  render();
+  setInterval(render, 2000);
+})();
+</script>
+</body>
+</html>

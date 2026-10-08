@@ -84,3 +84,6 @@ h1{font-size:clamp(30px,5vw,56px);letter-spacing:.08em;margin:26px 0 10px}h2{fon
 @media(max-width:760px){.login-form{grid-template-columns:1fr}.login-meta{display:grid;grid-template-columns:1fr}.login-meta span+span{border-left:0;border-top:1px solid var(--line)}.login-status-row{width:100%}}
 
 .organizer-link{display:inline-block;margin-top:16px;color:#65778b;font:9px monospace;letter-spacing:.14em;text-decoration:none;border-bottom:1px solid transparent;padding-bottom:3px}.organizer-link:hover{color:var(--cyan);border-bottom-color:var(--cyan)}
+
+.admin-portal-top{margin-left:auto;color:#687b90;font:9px monospace;letter-spacing:.14em;text-decoration:none;padding:8px 10px;border:1px solid transparent;transition:.2s}.admin-portal-top:hover{color:var(--cyan);border-color:#294154;background:rgba(107,231,255,.04)}.header-right{margin-left:0}
+@media(max-width:600px){.admin-portal-top{padding:7px 8px}.brand{font-size:10px}.header-right{gap:10px}}

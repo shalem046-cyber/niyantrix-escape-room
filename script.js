@@ -18,7 +18,7 @@
 
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
-  const screens = ['landing', 'board', 'moduleView', 'finalView', 'successView', 'failView'];
+  const screens = ['login', 'board', 'moduleView', 'finalView', 'successView', 'failView'];
 
   function show(id) {
     screens.forEach(name => document.getElementById(name).classList.toggle('active', name === id));

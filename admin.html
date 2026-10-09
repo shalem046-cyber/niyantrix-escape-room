@@ -44,16 +44,16 @@
     <div class="card login-card">
       <div class="eyebrow">AUTHORIZED ORGANIZER ACCESS</div>
       <h1>Admin Portal</h1>
-      <p class="muted">Monitor mission sessions from this browser.</p>
-      <label>USER ID
-        <input id="adminUser" class="input" autocomplete="username" placeholder="ENTER USER ID">
+      <p class="muted">Monitor sessions from every connected team device.</p>
+      <label>ORGANIZER EMAIL
+        <input id="adminUser" class="input" type="email" autocomplete="username" placeholder="ENTER ORGANIZER EMAIL">
       </label>
       <label>PASSWORD
         <input id="adminPass" class="input" type="password" autocomplete="current-password" placeholder="ENTER PASSWORD">
       </label>
       <button id="loginBtn" class="btn login-submit">ACCESS DASHBOARD</button>
       <div id="loginError" class="error"></div>
-      <div class="footer-note">This GitHub Pages dashboard uses browser-local session data. It is not a central server database.</div>
+      <div class="footer-note" id="databaseStatus">Shared cloud tracking needs the one-time setup in SUPABASE_SETUP.md.</div>
     </div>
   </section>
 
@@ -78,16 +78,29 @@
         </table>
       </div>
     </div>
-    <div class="footer-note">For true multi-device tracking, connect this dashboard to a backend database such as Supabase or Firebase.</div>
+    <div class="footer-note" id="cloudStatus">CLOUD SYNC // WAITING FOR ORGANIZER LOGIN</div>
   </section>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="database-config.js?v=20261009-1"></script>
 <script>
 (() => {
-  const ADMIN_USER = 'NXRADMIN';
-  const ADMIN_PASS = 'NXR@2026';
   const KEY = 'niyantrix_admin_sessions_v1';
+  const cloudConfig = window.NIYANTRIX_CONFIG || {};
+  const cloudEnabled = Boolean(
+    window.supabase?.createClient &&
+    typeof cloudConfig.SUPABASE_URL === 'string' &&
+    cloudConfig.SUPABASE_URL.trim().startsWith('https://') &&
+    typeof cloudConfig.SUPABASE_ANON_KEY === 'string' &&
+    cloudConfig.SUPABASE_ANON_KEY.trim()
+  );
+  const db = cloudEnabled
+    ? window.supabase.createClient(cloudConfig.SUPABASE_URL.trim(), cloudConfig.SUPABASE_ANON_KEY.trim())
+    : null;
   const $ = s => document.querySelector(s);
+  let isAdmin = false;
+  let refreshInProgress = false;
 
   function read() {
     try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
@@ -172,17 +185,106 @@
     URL.revokeObjectURL(url);
   }
 
-  function login() {
-    const user = $('#adminUser').value.trim().toUpperCase();
-    const pass = $('#adminPass').value;
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
-      sessionStorage.setItem('niyantrix_admin_auth','1');
-      $('#loginView').style.display = 'none';
-      $('#dashboard').classList.add('show');
-      $('#topActions').style.display = 'flex';
-      render();
+  function showDashboard() {
+    isAdmin = true;
+    $('#loginView').style.display = 'none';
+    $('#dashboard').classList.add('show');
+    $('#topActions').style.display = 'flex';
+    $('#cloudStatus').textContent = 'CLOUD SYNC // CONNECTING';
+  }
+
+  async function login() {
+    if (!db) {
+      $('#loginError').textContent = 'Cloud database is not configured. Follow SUPABASE_SETUP.md, then refresh this page.';
+      $('#databaseStatus').textContent = 'SETUP REQUIRED // Add your Supabase project URL and public key to database-config.js.';
+      return;
+    }
+
+    const email = $('#adminUser').value.trim();
+    const password = $('#adminPass').value;
+    if (!email || !password) {
+      $('#loginError').textContent = 'Enter the organizer email and password created in Supabase.';
+      return;
+    }
+
+    $('#loginBtn').disabled = true;
+    $('#loginError').textContent = '';
+    const { data, error } = await db.auth.signInWithPassword({ email, password });
+    $('#loginBtn').disabled = false;
+
+    if (error || !data?.user) {
+      $('#loginError').textContent = 'Sign-in failed. Check the organizer email and password.';
+      return;
+    }
+
+    const { data: allowed, error: roleError } = await db.rpc('is_niyantrix_admin');
+    if (roleError || allowed !== true) {
+      await db.auth.signOut();
+      $('#loginError').textContent = 'This account is not authorized for the NIYANTRIX organizer portal.';
+      return;
+    }
+
+    showDashboard();
+    await refreshCloudSessions();
+  }
+
+  async function restoreAuth() {
+    if (!db) {
+      $('#databaseStatus').textContent = 'SETUP REQUIRED // Follow SUPABASE_SETUP.md to enable multi-device tracking.';
+      $('#cloudStatus').textContent = 'CLOUD SYNC // NOT CONFIGURED';
+      return;
+    }
+
+    const { data, error } = await db.auth.getSession();
+    if (error || !data.session) {
+      $('#databaseStatus').textContent = 'Cloud database ready. Sign in with the organizer account created in Supabase.';
+      return;
+    }
+
+    const { data: allowed, error: roleError } = await db.rpc('is_niyantrix_admin');
+    if (!roleError && allowed === true) {
+      showDashboard();
+      await refreshCloudSessions();
     } else {
-      $('#loginError').textContent = 'Invalid administrator credentials.';
+      $('#databaseStatus').textContent = 'This account is not registered as a NIYANTRIX organizer. Use the configured organizer account.';
+    }
+  }
+
+  async function refreshCloudSessions() {
+    if (!db || !isAdmin || refreshInProgress) return;
+    refreshInProgress = true;
+    try {
+      const { data, error } = await db
+        .from('niyantrix_sessions')
+        .select('mission_id, team_name, status, started_at, last_seen, finished_at, duration_seconds, errors, hints')
+        .order('started_at', { ascending: false })
+        .limit(200);
+
+      if (error) {
+        $('#cloudStatus').textContent = 'CLOUD SYNC ERROR // CHECK SUPABASE SETUP';
+        console.error('NIYANTRIX session fetch failed:', error);
+        return;
+      }
+
+      const sessions = (data || []).map(row => ({
+        missionId: row.mission_id,
+        teamName: row.team_name,
+        status: row.status,
+        startedAt: row.started_at,
+        lastSeen: row.last_seen,
+        finishedAt: row.finished_at || '',
+        durationSeconds: row.duration_seconds,
+        errors: row.errors,
+        hints: row.hints
+      }));
+      localStorage.setItem(KEY, JSON.stringify(sessions));
+      render();
+      $('#cloudStatus').textContent = 'CLOUD SYNC // CONNECTED · ' + new Date().toLocaleTimeString();
+    } catch (error) {
+      $('#cloudStatus').textContent = 'CLOUD SYNC ERROR // CHECK CONNECTION';
+      console.error('NIYANTRIX cloud refresh failed:', error);
+    } finally {
+      refreshInProgress = false;
     }
   }
 
@@ -197,6 +299,29 @@
     render();
   }
 
+  async function logout() {
+    if (db) await db.auth.signOut();
+    isAdmin = false;
+    location.reload();
+  }
+
+  async function clearData() {
+    if (!db || !isAdmin) {
+      $('#cloudStatus').textContent = 'CLOUD SYNC // ADMIN SIGN-IN REQUIRED';
+      return;
+    }
+    if (!confirm('Clear all NIYANTRIX session records from the shared cloud database? This cannot be undone.')) return;
+
+    const { error } = await db.from('niyantrix_sessions').delete().neq('mission_id', '');
+    if (error) {
+      $('#cloudStatus').textContent = 'CLEAR FAILED // CHECK ADMIN PERMISSIONS';
+      console.error('NIYANTRIX clear data failed:', error);
+      return;
+    }
+    localStorage.removeItem(KEY);
+    await refreshCloudSessions();
+  }
+
   $('#loginBtn').addEventListener('click', login);
   $('#adminPass').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
   $('#adminUser').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
@@ -204,13 +329,12 @@
   $('#clearBtn').addEventListener('click', clearData);
   $('#exportBtn').addEventListener('click', exportCsv);
 
-  if (sessionStorage.getItem('niyantrix_admin_auth') === '1') {
-    $('#loginView').style.display = 'none';
-    $('#dashboard').classList.add('show');
-    $('#topActions').style.display = 'flex';
-  }
   render();
-  setInterval(render, 2000);
+  void restoreAuth();
+  setInterval(() => {
+    if (isAdmin) void refreshCloudSessions();
+    else render();
+  }, 5000);
 })();
 </script>
 </body>

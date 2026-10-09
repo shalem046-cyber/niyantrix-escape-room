@@ -34,6 +34,22 @@
   }
 
   const ADMIN_STORAGE_KEY = 'niyantrix_admin_sessions_v1';
+  const cloudConfig = window.NIYANTRIX_CONFIG || {};
+  const cloudEnabled = Boolean(
+    window.supabase?.createClient &&
+    typeof cloudConfig.SUPABASE_URL === 'string' &&
+    cloudConfig.SUPABASE_URL.trim().startsWith('https://') &&
+    typeof cloudConfig.SUPABASE_ANON_KEY === 'string' &&
+    cloudConfig.SUPABASE_ANON_KEY.trim()
+  );
+  const cloudClient = cloudEnabled
+    ? window.supabase.createClient(cloudConfig.SUPABASE_URL.trim(), cloudConfig.SUPABASE_ANON_KEY.trim())
+    : null;
+
+  let cloudIdentityPromise = null;
+  let lastCloudAttemptAt = 0;
+  let lastCloudAttemptMissionId = '';
+  let cloudErrorReported = false;
 
   function readAdminSessions() {
     try {
@@ -49,10 +65,73 @@
     } catch {}
   }
 
+  async function ensureCloudIdentity() {
+    if (!cloudClient) return null;
+    if (!cloudIdentityPromise) {
+      cloudIdentityPromise = (async () => {
+        const { data, error } = await cloudClient.auth.getSession();
+        if (error) throw error;
+        if (data.session?.user?.id) return data.session.user.id;
+
+        const { data: anonymousData, error: anonymousError } = await cloudClient.auth.signInAnonymously();
+        if (anonymousError) throw anonymousError;
+        return anonymousData.user?.id || anonymousData.session?.user?.id || null;
+      })().catch(error => {
+        if (!cloudErrorReported) {
+          console.warn('NIYANTRIX cloud identity is unavailable. Check Supabase setup.', error);
+          cloudErrorReported = true;
+        }
+        cloudIdentityPromise = null;
+        return null;
+      });
+    }
+    return cloudIdentityPromise;
+  }
+
+  async function syncAdminSessionToCloud(session, force = false) {
+    if (!cloudClient || !session?.missionId) return;
+
+    const now = Date.now();
+    if (!force && session.missionId === lastCloudAttemptMissionId && now - lastCloudAttemptAt < 10000) return;
+    lastCloudAttemptAt = now;
+    lastCloudAttemptMissionId = session.missionId;
+
+    const ownerId = await ensureCloudIdentity();
+    if (!ownerId) return;
+
+    // The team access code is deliberately never included in this record.
+    const row = {
+      mission_id: session.missionId,
+      owner_id: ownerId,
+      team_name: session.teamName || 'UNNAMED',
+      status: session.status || 'Active',
+      started_at: session.startedAt || new Date().toISOString(),
+      last_seen: session.lastSeen || new Date().toISOString(),
+      finished_at: session.finishedAt || null,
+      duration_seconds: Math.max(0, Number(session.durationSeconds) || 0),
+      errors: Math.max(0, Number(session.errors) || 0),
+      hints: Math.max(0, Number(session.hints) || 0)
+    };
+
+    const { error } = await cloudClient
+      .from('niyantrix_sessions')
+      .upsert(row, { onConflict: 'mission_id' });
+
+    if (error) {
+      if (!cloudErrorReported) {
+        console.warn('NIYANTRIX cloud session save failed. Check SUPABASE_SETUP.md and RLS policies.', error);
+        cloudErrorReported = true;
+      }
+      return;
+    }
+    cloudErrorReported = false;
+  }
+
   function upsertAdminSession(patch) {
     const sessions = readAdminSessions();
     const index = sessions.findIndex(item => item.missionId === state.missionId);
-    const existing = index >= 0 ? sessions[index] : {
+    const wasCreated = index < 0;
+    const existing = wasCreated ? {
       missionId: state.missionId,
       teamName: state.teamName || 'UNNAMED',
       startedAt: new Date().toISOString(),
@@ -62,11 +141,15 @@
       durationSeconds: 0,
       errors: 0,
       hints: 0
-    };
+    } : sessions[index];
+
     const updated = { ...existing, ...patch, lastSeen: new Date().toISOString() };
-    if (index >= 0) sessions[index] = updated;
-    else sessions.unshift(updated);
+    if (wasCreated) sessions.unshift(updated);
+    else sessions[index] = updated;
     writeAdminSessions(sessions.slice(0, 200));
+
+    const importantChange = wasCreated || updated.status !== existing.status;
+    void syncAdminSessionToCloud(updated, importantChange);
   }
 
   function trackMissionStart() {
@@ -105,7 +188,6 @@
       hints: state.hints
     });
   }
-
 
   function renderTimer() {
     const safeTime = Math.max(0, state.time);
